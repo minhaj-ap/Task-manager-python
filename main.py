@@ -2,7 +2,7 @@ import json
 from datetime import datetime
 import os
 
-FILE_NAME = "task.json"
+FILE_NAME = "task.json"  # file name goes here
 
 
 # Expected task.json format
@@ -202,6 +202,9 @@ def viewPendingTask(showId=False):
 
 
 def sortedData():
+    if (len(DATA)) <= 0:
+        print("File looks empty")
+        return
     sortedList = sorted(DATA, key=lambda x: x["priority"] != "High")
     # The ones with priority high will retrun 0 and therefore first
     print("\nHERE IS THE SORTED DATA\n")
