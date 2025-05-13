@@ -1,5 +1,5 @@
 import json
-import datetime
+from datetime import datetime
 import os
 
 FILE_NAME = "task.json"
@@ -17,10 +17,16 @@ FILE_NAME = "task.json"
 # ]
 
 
-def displayData(list: list):
-    print(
-        f"Title:{list[0]['title']}\tDeadline:{list[0]['deadline']}\tPriority:{list[0]['priority']}\tCompleted:{list[0]['completed']}"
+def displayData(task_list: list):
+    listN = sorted(
+        task_list,
+        key=lambda x: datetime.strptime(x["deadline"], "%Y-%m-%d"),
     )
+    for i in range(len(listN)):
+        print(
+            f"Title:{listN[i]['title']}\tDeadline:{listN[i]['deadline']}\tPriority:{listN[i]['priority']}\tCompleted:{listN[i]['completed']}"
+        )
+    print("\n")
 
 
 def addTask():
@@ -63,6 +69,7 @@ def viewTask():
     if len(DATA) <= 0:
         print("Seems like file is empty")
         return
+    print("\nHERE ARE YOUR TASKS\n")
     displayData(tasks)
 
 
@@ -74,11 +81,16 @@ def viewPendingTask():
     if len(pTask) <= 0:
         print("Everything is completed")
         return
+    print("\nHERE ARE YOUR PENDING TASKS\n")
     displayData(pTask)
 
 
 def sortedData():
     print("sorted data")
+    sortedList = sorted(DATA, key=lambda x: x["priority"] != "High")
+    # The ones with priority high will retrun 0 and therefore first
+    print("\nHERE IS THE SORTED DATA\n")
+    displayData(sortedList)
 
 
 def main():
@@ -105,7 +117,7 @@ def main():
             markComplete()
         elif choice == 6:
             viewPendingTask()
-        elif choice==7:
+        elif choice == 7:
             sortedData()
         else:
             print("Invalid input")
