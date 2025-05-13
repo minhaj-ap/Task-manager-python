@@ -117,10 +117,10 @@ def editTask():
                         break
                     if new_value != "":
                         if new_value == "H":
-                            new_data["priority"] = "HIGH"
+                            new_data["priority"] = "High"
                             break
                         elif new_value == "L":
-                            new_data["priority"] = "LOW"
+                            new_data["priority"] = "Low"
                             break
                         else:
                             raise ValueError()
