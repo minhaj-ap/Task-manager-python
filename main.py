@@ -17,16 +17,36 @@ FILE_NAME = "task.json"
 # ]
 
 
-def displayData(task_list: list):
+def displayData(task_list: list, showId=False):
     listN = sorted(
         task_list,
         key=lambda x: datetime.strptime(x["deadline"], "%Y-%m-%d"),
     )
     for i in range(len(listN)):
+        id_part = f"ID: {listN[i]['id']}\t" if showId else ""
         print(
-            f"Title:{listN[i]['title']}\tDeadline:{listN[i]['deadline']}\tPriority:{listN[i]['priority']}\tCompleted:{listN[i]['completed']}"
+            f"{id_part}Title:{listN[i]['title']}\tDeadline:{listN[i]['deadline']}\tPriority:{listN[i]['priority']}\tCompleted:{listN[i]['completed']}"
         )
     print("\n")
+
+
+def loadTask() -> list:
+    global DATA
+    if os.path.exists(FILE_NAME):
+        if os.path.getsize(FILE_NAME) == 0:
+            print("No tasks exists in the file")
+            DATA = []
+            return
+        try:
+            with open(FILE_NAME, "r") as file:
+                DATA = json.load(file)
+        except json.JSONDecodeError:
+            print("Error: task.json is not a valid JSON file.")
+            DATA = []
+            return
+    else:
+        print("Please add a task.json file in the folder")
+        return
 
 
 def addTask():
@@ -58,30 +78,42 @@ def editTask():
 
 
 def markComplete():
-    print("mark complete")
+    global DATA
+    tasks = DATA
+    if len(DATA) <= 0:
+        print("Seems like file is empty")
+        return
+    viewPendingTask(True)
+    try:
+        id_to_mark = int(input("Enter the id to mark complete: "))
+    except ValueError:
+        print("only numbers are allowed")
+        id_to_mark = int(input("Enter the id to mark complete: "))
+    for task in DATA:
+        if task["id"] == id_to_mark:
+            task["completed"] = True
+    with open(FILE_NAME, "w") as file:
+        json.dump(DATA, file, indent=4)
+    print("Successfully updated!!")
 
 
 def deleteTask():
-    print("Delete task")
-
-
-def loadTask():
     global DATA
-    if os.path.exists(FILE_NAME):
-        if os.path.getsize(FILE_NAME) == 0:
-            print("No tasks exists in the file")
-            DATA = []
-            return
-        try:
-            with open(FILE_NAME, "r") as file:
-                DATA = json.load(file)
-        except json.JSONDecodeError:
-            print("Error: task.json is not a valid JSON file.")
-            DATA = []
-            return
-    else:
-        print("Please add a task.json file in the folder")
+    tasks = DATA
+    if len(DATA) <= 0:
+        print("Seems like file is empty")
         return
+    print("\nHERE ARE YOUR TASKS SORTED ON THE BASIS OF DEADLINE\n")
+    displayData(tasks, True)
+    try:
+        id_to_dlt = int(input("Enter the id to delete: "))
+    except ValueError:
+        print("only numbers are allowed")
+        id_to_dlt = int(input("Enter the id to delete: "))
+    DATA = [e for e in DATA if e["id"] != id_to_dlt]
+    with open(FILE_NAME, "w") as file:
+        json.dump(DATA, file, indent=4)
+    print("Successfully deleted!!")
 
 
 def viewTask():
@@ -89,11 +121,11 @@ def viewTask():
     if len(DATA) <= 0:
         print("Seems like file is empty")
         return
-    print("\nHERE ARE YOUR TASKS\n")
+    print("\nHERE ARE YOUR TASKS SORTED BY DEADLINE\n")
     displayData(tasks)
 
 
-def viewPendingTask():
+def viewPendingTask(showId=False):
     if len(DATA) <= 0:
         print("No tasks found")
         return
@@ -101,8 +133,8 @@ def viewPendingTask():
     if len(pTask) <= 0:
         print("Everything is completed")
         return
-    print("\nHERE ARE YOUR PENDING TASKS\n")
-    displayData(pTask)
+    print("\nHERE ARE YOUR PENDING TASKS SORTED BY DEADLINE\n")
+    displayData(pTask, showId=showId)
 
 
 def sortedData():
@@ -120,7 +152,7 @@ def main():
     print("To delete tasks input 4")
     print("To mark complete a  task input 5")
     print("To view pending tasks input 6")
-    print("To view tasks sorted by priority input 7")
+    print("To view tasks sorted by priority input 7\n")
     loadTask()
     while True:
         choice = int(input("Enter your choice: "))
