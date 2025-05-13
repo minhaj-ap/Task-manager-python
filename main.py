@@ -30,7 +30,27 @@ def displayData(task_list: list):
 
 
 def addTask():
-    print("Add task")
+    print("Add new task")
+    title = input("Enter title: ")
+    deadline = input("Enter deadline in the format YYYY-MM-DD: ")
+    try:
+        datetime.strptime(deadline, "%Y-%m-%d")
+    except ValueError:
+        print("Enter date in correct format")
+        deadline = input("Enter deadline in the format YYYY-MM-DD: ")
+    priority = input("Enter H for high priority and L for low priority: ").upper()
+    id = DATA[-1]["id"] + 1
+    print(f"Recieved data:{title},{deadline},{priority},{id}")
+    recievedData = {
+        "id": id,
+        "title": title,
+        "deadline": deadline,
+        "priority": "High" if priority == "H" else "Low",
+        "completed": False,
+    }
+    DATA.append(recievedData)
+    with open(FILE_NAME, "w") as file:
+        json.dump(DATA, file, indent=4)
 
 
 def editTask():
@@ -86,7 +106,6 @@ def viewPendingTask():
 
 
 def sortedData():
-    print("sorted data")
     sortedList = sorted(DATA, key=lambda x: x["priority"] != "High")
     # The ones with priority high will retrun 0 and therefore first
     print("\nHERE IS THE SORTED DATA\n")
