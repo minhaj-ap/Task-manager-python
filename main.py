@@ -52,12 +52,13 @@ def loadTask() -> list:
 def addTask():
     print("Add new task")
     title = input("Enter title: ")
-    deadline = input("Enter deadline in the format YYYY-MM-DD: ")
-    try:
-        datetime.strptime(deadline, "%Y-%m-%d")
-    except ValueError:
-        print("Enter date in correct format")
-        deadline = input("Enter deadline in the format YYYY-MM-DD: ")
+    while True:
+        try:
+            deadline = input("Enter deadline in the format YYYY-MM-DD: ")
+            datetime.strptime(deadline, "%Y-%m-%d")
+            break
+        except ValueError:
+            print("Invalid format")
     priority = input("Enter H for high priority and L for low priority: ").upper()
     id = DATA[-1]["id"] + 1
     print(f"Recieved data:{title},{deadline},{priority},{id}")
@@ -74,7 +75,70 @@ def addTask():
 
 
 def editTask():
-    print("Edit task")
+    task = DATA
+    if len(task) <= 0:
+        print("NO TASKS FOR EDIT")
+        return
+    print("HERE ARE THE TASKS YOU CAN EDIT\n")
+    displayData(task, True)
+    try:
+        id = int(input("Enter the id to be edited: "))
+    except ValueError:
+        print("Only numbers are allowed")
+        id = int(input("Enter the id to be edited: "))
+    selected_task = [e for e in task if e["id"] == id]
+    new_data = {}
+    for key, obj in selected_task[0].items():
+        new_data[key] = obj
+    for key, obj in selected_task[0].items():
+        if key == "id" or key == "completed":
+            continue
+        if key == "deadline":
+            while True:
+                new_value = input(
+                    f"Enter DEADLINE, leave empty for no change (currently: {obj}) (format:YYYY-MM-DD): "
+                )
+                if new_value == "":
+                    break
+                try:
+                    datetime.strptime(new_value, "%Y-%m-%d")
+                    new_data[key] = new_value
+                    break
+                except ValueError:
+                    print("Invlaid format")
+            continue
+        if key == "priority":
+            while True:
+                try:
+                    new_value = input(
+                        f"Enter priority , H for high and L for low, leave empty for no changes (currently:{obj}): "
+                    ).upper()
+                    if new_value == "":
+                        break
+                    if new_value != "":
+                        if new_value == "H":
+                            new_data["priority"] = "HIGH"
+                            break
+                        elif new_value == "L":
+                            new_data["priority"] = "LOW"
+                            break
+                        else:
+                            raise ValueError()
+                except ValueError:
+                    print("Only H and L are valid inputs")
+            continue
+        new_value = input(
+            f"Enter {(key).upper()} ,leave empty for no change (currently: {obj}): "
+        )
+        if new_value != "":
+            new_data[key] = new_value
+
+    for e in DATA:
+        if e["id"] == id:
+            e.update(new_data)
+    with open(FILE_NAME, "w") as file:
+        json.dump(DATA, file, indent=4)
+    print("Successfully updated")
 
 
 def markComplete():
